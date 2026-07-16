@@ -7,4 +7,5 @@ seaborn
 scikit-learn
 wordcloud
 streamlit
+nltk
 #-e .
