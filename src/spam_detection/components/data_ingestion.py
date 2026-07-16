@@ -20,7 +20,7 @@ class DataIngestion:
         logging.info("Data Ingestion Started")
 
         try:
-            data = pd.read_csv("../notebooks/data/enron_spam_data.csv")
+            data = pd.read_csv(r"C:\Users\LENOVO\Desktop\E2E-Spam-Email-Detection\notebooks\data\enron_spam_data.csv")
             logging.info("Dataset loaded successfully.")
 
             data["Message"] = data["Message"].fillna("")

@@ -219,3 +219,4 @@ __marimo__/
 
 # Data
 notebooks/data/enron_spam_data.csv
+artifacts/*
