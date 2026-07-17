@@ -1,9 +1,24 @@
 import os
 import sys
 import joblib
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, average_precision_score, classification_report
 from src.spam_detection.logger import logging
 from src.spam_detection.exception import CustomException
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, average_precision_score, classification_report
+import string
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+for package in [
+    "punkt",
+    "stopwords",
+    "wordnet",
+    "omw-1.4"
+]:
+    nltk.download(package, quiet=True)
+
+STOPWORDS = set(stopwords.words("english"))
+LEMMATIZER = WordNetLemmatizer()
+
 
 def save_object(file_path, obj):
     try:
@@ -16,6 +31,7 @@ def save_object(file_path, obj):
         logging.info("Exception occurred while saving object")
         raise CustomException(e, sys)
 
+
 def load_object(file_path):
     try:
         obj = joblib.load(file_path)
@@ -26,21 +42,27 @@ def load_object(file_path):
         logging.info("Exception occurred while loading object")
         raise CustomException(e, sys)
 
+
 def evaluate_model(X_train, y_train, X_test, y_test, models):
     try:
+
         report = {}
         trained_models = {}
 
         for model_name, model in models.items():
-            logging.info(f"Training model: {model_name}")
+            logging.info(f"Training {model_name}")
 
-            model.fit(X_train,y_train)
+            model.fit(X_train, y_train)
 
             y_pred = model.predict(X_test)
 
-            y_probability = None
-            if hasattr(model,"predict_proba"):
-                y_probability = model.predict_proba(X_test)[:,1]
+            if hasattr(model, "predict_proba"):
+                y_score = model.predict_proba(X_test)[:, 1]
+            elif hasattr(model, "decision_function"):
+                y_score = model.decision_function(X_test)
+            else:
+                y_score = y_pred
+
 
             accuracy = accuracy_score(
                 y_test,
@@ -65,26 +87,28 @@ def evaluate_model(X_train, y_train, X_test, y_test, models):
                 zero_division=0
             )
 
-            roc_auc = None
-            pr_auc = None
+            roc_auc = roc_auc_score(
+                y_test,
+                y_score
+            )
 
-            if y_probability is not None:
-                roc_auc = roc_auc_score(
-                    y_test,
-                    y_probability
-                )
+            pr_auc = average_precision_score(
+                y_test,
+                y_score
+            )
 
-                pr_auc = average_precision_score(
-                    y_test,
-                    y_probability
-                )
-
-            print("\n==============================")
+            print("\n" + "=" * 60)
             print(model_name)
+            print("=" * 60)
+            print(
+                classification_report(
+                    y_test,
+                    y_pred,
+                    target_names=["Ham", "Spam"]
+                )
+            )
+            print("=" * 60 + "\n")
 
-            print(classification_report(y_test, y_pred, target_names=["Ham","Spam"]))
-
-            print("==============================\n")
             report[model_name] = {
                 "accuracy": accuracy,
                 "precision": precision,
@@ -93,14 +117,43 @@ def evaluate_model(X_train, y_train, X_test, y_test, models):
                 "roc_auc": roc_auc,
                 "pr_auc": pr_auc
             }
-
             trained_models[model_name] = model
 
-        return (
-            report,
-            trained_models
-        )
+            logging.info(
 
+                f"""
+                Model : {model_name}
+                Accuracy : {accuracy:.4f}
+                Precision : {precision:.4f}
+                Recall : {recall:.4f}
+                F1 Score : {f1:.4f}
+                ROC AUC : {roc_auc:.4f}
+                PR AUC : {pr_auc:.4f}
+                """
+            )
+
+        return report, trained_models
+    
     except Exception as e:
         logging.info("Exception occurred during model evaluation")
         raise CustomException(e, sys)
+    
+
+
+def transform_text(text: str) -> str:
+    text = text.lower()
+    tokens = nltk.word_tokenize(text)
+    tokens = [word for word in tokens if word.isalnum()]
+
+    tokens = [
+        word
+        for word in tokens
+        if word not in STOPWORDS
+    ]
+
+    tokens = [
+        LEMMATIZER.lemmatize(word)
+        for word in tokens
+    ]
+
+    return " ".join(tokens)
