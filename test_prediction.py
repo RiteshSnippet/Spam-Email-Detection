@@ -40,6 +40,23 @@ def test_predictions():
             Special offer available.
             Contact us for more information.
             """
+        ),
+
+        (
+            "Project Discussion",
+            """
+            Hi team,
+            Can we meet tomorrow to discuss the project progress?
+            Please share your updates before the meeting.
+            """
+        ),
+
+        (
+            "Dinner Plan",
+            """
+            Hey, are we still meeting for dinner tonight?
+            Let me know the time.
+            """
         )
     ]
 

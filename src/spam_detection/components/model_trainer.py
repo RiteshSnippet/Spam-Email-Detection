@@ -10,7 +10,7 @@ from src.spam_detection.utils.utils import save_object, evaluate_model
 
 @dataclass
 class ModelTrainerConfig:
-    trained_model_file_path = os.path.join(
+    trained_model_file_path: str = os.path.join(
         "artifacts",
         "Model.joblib"
     )
