@@ -16,9 +16,6 @@ for package in [
 ]:
     nltk.download(package, quiet=True)
 
-STOPWORDS = set(stopwords.words("english"))
-LEMMATIZER = WordNetLemmatizer()
-
 
 def save_object(file_path, obj):
     try:
@@ -139,21 +136,33 @@ def evaluate_model(X_train, y_train, X_test, y_test, models):
         raise CustomException(e, sys)
     
 
-
+LEMMATIZER = WordNetLemmatizer()
 def transform_text(text: str) -> str:
+    # lowercase
     text = text.lower()
-    tokens = nltk.word_tokenize(text)
-    tokens = [word for word in tokens if word.isalnum()]
 
-    tokens = [
-        word
-        for word in tokens
-        if word not in STOPWORDS
-    ]
+    # tokenize
+    text = nltk.word_tokenize(text)
 
-    tokens = [
-        LEMMATIZER.lemmatize(word)
-        for word in tokens
-    ]
+    # remove special characters/punctuation
+    y = []
+    for i in text:
+        if i.isalnum():
+            y.append(i)
 
-    return " ".join(tokens)
+    text = y[:]
+    y.clear()
+
+    # remove stopwords
+    for i in text:
+        if i not in stopwords.words('english') and i not in string.punctuation:
+            y.append(i)
+
+    text = y[:]
+    y.clear()
+
+    # lemmatization 
+    for i in text:
+        y.append(LEMMATIZER.lemmatize(i))
+
+    return " ".join(y)

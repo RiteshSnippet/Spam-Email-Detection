@@ -37,13 +37,13 @@ class ModelTrainer:
                         penalty="l2",
                         solver="liblinear",
                         max_iter=1000,
-                        random_state=42
+                        class_weight="balanced"
                     ),
                 "LinearSVC":
                     LinearSVC(
                         C=0.5,
                         loss="squared_hinge",
-                        random_state=42
+                        class_weight="balanced"
                     )
             }
 

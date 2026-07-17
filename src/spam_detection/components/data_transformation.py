@@ -33,15 +33,17 @@ class DataTransformation:
         try:
             logging.info("Data Transformation Started")
             train_df = pd.read_csv(
-                train_path
+                train_path,
+                keep_default_na=False
             )
 
             test_df = pd.read_csv(
-                test_path
+                test_path,
+                keep_default_na=False
             )
 
-            logging.info(f"Train Shape : {train_df.shape}")
-            logging.info(f"Test Shape : {test_df.shape}")
+            logging.info(f"Train missing values:\n{train_df.isnull().sum()}")
+            logging.info(f"Test missing values:\n{test_df.isnull().sum()}")
 
             X_train = train_df["transformed_text"]
 
