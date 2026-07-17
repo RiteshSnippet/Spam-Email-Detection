@@ -1,0 +1,9 @@
+.venv/
+.git/
+notebooks/
+.ipynb_checkpoints
+__pycache__/
+*.pyc
+artifacts/raw_data.csv
+artifacts/train_data.csv
+artifacts/test_data.csv
